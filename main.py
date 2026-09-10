@@ -10,30 +10,34 @@ def main() -> None:
         players = json.load(file)
 
     for nickname, player in players.items():
+        race_data = player.get("race", {})
+
         race, created = Race.objects.get_or_create(
-            name=player["race"]["name"],
-            description=player["race"]["description"]
+            name=race_data.get("name"),
+            description=race_data.get("description")
         )
 
-        if player["guild"]:
+        guild_data = player.get("guild")
+
+        if guild_data:
             guild, created = Guild.objects.get_or_create(
-                name=player["guild"]["name"],
-                description=player["guild"]["description"]
+                name=guild_data.get("name"),
+                description=guild_data.get("description")
             )
         else:
             guild = None
 
-        for skill in player["race"]["skills"]:
+        for skill in race_data.get("skills", []):
             Skill.objects.get_or_create(
-                name=skill["name"],
-                bonus=skill["bonus"],
+                name=skill.get("name"),
+                bonus=skill.get("bonus"),
                 race=race
             )
 
         Player.objects.get_or_create(
             nickname=nickname,
-            email=player["email"],
-            bio=player["bio"],
+            email=player.get("email"),
+            bio=player.get("bio"),
             race=race,
             guild=guild
         )
